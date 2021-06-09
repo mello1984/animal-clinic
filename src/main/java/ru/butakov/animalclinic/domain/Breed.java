@@ -16,7 +16,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "breeds")
-public class Breed implements HasName {
+public class Breed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;

@@ -16,12 +16,17 @@ import java.util.stream.Collectors;
 public class KindDto {
     long id;
     String name;
-    @EqualsAndHashCode.Exclude
     Set<String> breeds;
 
     public KindDto(Kind kind) {
         this.id = kind.getId();
         this.name = kind.getName();
         this.breeds = kind.getBreeds().stream().map(Breed::getName).collect(Collectors.toUnmodifiableSet());
+    }
+
+    public KindDto(long id, String name, Set<String> breeds) {
+        this.id = id;
+        this.name = name;
+        this.breeds = breeds;
     }
 }

@@ -1,25 +1,24 @@
 package ru.butakov.animalclinic.service;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.butakov.animalclinic.dao.KindRepository;
+import ru.butakov.animalclinic.domain.Animal;
 import ru.butakov.animalclinic.domain.Breed;
 import ru.butakov.animalclinic.domain.Kind;
-import ru.butakov.animalclinic.domain.dto.BreedDto;
 import ru.butakov.animalclinic.domain.dto.KindDto;
 import ru.butakov.animalclinic.exceptions.AnimalApiBadRequest;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(properties = "spring.main.lazy-initialization=true")
 class KindServiceImplTest {
@@ -30,16 +29,10 @@ class KindServiceImplTest {
     @MockBean
     ServiceUtils serviceUtils;
 
-
     @Test
     void findAll() {
-        Kind kind1 = new Kind();
-        kind1.setId(1);
-        kind1.setName("kind1");
-
-        Kind kind2 = new Kind();
-        kind2.setId(2);
-        kind2.setName("kind2");
+        Kind kind1 = Kind.builder().id(1).name("Dog").build();
+        Kind kind2 = Kind.builder().id(2).name("Cat").build();
 
         List<Kind> expected = List.of(kind1, kind2);
         Mockito.when(kindRepository.findAll()).thenReturn(expected);
@@ -50,13 +43,10 @@ class KindServiceImplTest {
         Mockito.verifyNoMoreInteractions(kindRepository);
     }
 
-
     @Test
     void findById() {
         long id = 1;
-        Kind kind = new Kind();
-        kind.setId(id);
-        kind.setName("kind");
+        Kind kind = Kind.builder().id(id).name("Dog").build();
 
         Optional<Kind> expected = Optional.of(kind);
         Mockito.when(kindRepository.findById(id)).thenReturn(expected);
@@ -69,10 +59,8 @@ class KindServiceImplTest {
 
     @Test
     void findByName() {
-        String name = "kind";
-        Kind kind = new Kind();
-        kind.setId(1);
-        kind.setName(name);
+        String name = "Dog";
+        Kind kind = Kind.builder().id(1).name(name).build();
 
         Optional<Kind> expected = Optional.of(kind);
         Mockito.when(kindRepository.findByName(name)).thenReturn(expected);
@@ -85,13 +73,8 @@ class KindServiceImplTest {
 
     @Test
     void save() {
-        Kind kind = new Kind();
-        kind.setId(1);
-        kind.setName("kind");
-
-        Kind expected = new Kind();
-        expected.setId(2);
-        expected.setName("kind name");
+        Kind kind = Kind.builder().id(1).name("Dog").build();
+        Kind expected = Kind.builder().id(2).name("Killer dog").build();
 
         Mockito.when(kindRepository.save(kind)).thenReturn(expected);
         Kind actual = kindService.save(kind);
@@ -102,11 +85,8 @@ class KindServiceImplTest {
 
     @Test
     void addAndReturnDtoSuccessful() {
-        String name = "kind name";
-
-        Kind kind = new Kind();
-        kind.setId(1);
-        kind.setName(name);
+        String name = "Dog";
+        Kind kind = Kind.builder().id(1).name(name).build();
 
         KindDto expected = new KindDto(kind);
         Mockito.when(kindRepository.save(Mockito.any(Kind.class))).thenReturn(kind);
@@ -123,7 +103,7 @@ class KindServiceImplTest {
 
     @Test
     void addAndReturnDtoExists() {
-        String name = "kind name";
+        String name = "Dog";
         String message = "message";
 
         Mockito.doThrow(new AnimalApiBadRequest(message))
@@ -149,9 +129,7 @@ class KindServiceImplTest {
 
     @Test
     void findAllDtoSuccessful() {
-        Kind kind = new Kind();
-        kind.setId(1);
-        kind.setName("name");
+        Kind kind = Kind.builder().id(1).name("Dog").build();
 
         Mockito.when(kindRepository.findAll()).thenReturn(List.of(kind));
         List<KindDto> expected = List.of(new KindDto(kind));
@@ -160,5 +138,97 @@ class KindServiceImplTest {
         assertThat(actual).isEqualTo(expected);
         Mockito.verify(kindRepository).findAll();
         Mockito.verifyNoMoreInteractions(kindRepository);
+    }
+
+    @Test
+    void deleteSuccessful() {
+        long id = 1;
+        Kind kind = Kind.builder().id(id).name("Dog").build();
+
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(kindService, Kind.class, id)).thenReturn(kind);
+        kindService.delete(id);
+
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+        Mockito.verify(kindRepository).delete(kind);
+        Mockito.verifyNoMoreInteractions(kindRepository);
+    }
+
+    @Test
+    void deleteFailed() {
+        long id = 1;
+        Mockito.doThrow(new AnimalApiBadRequest("message")).when(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
+
+        assertThatThrownBy(() -> kindService.delete(id));
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+        Mockito.verifyNoInteractions(kindRepository);
+    }
+
+
+    @Test
+    void getKindDtoByIdSuccessful() {
+        long id = 1;
+        Kind kind = Kind.builder().id(id).name("Dog").build();
+        KindDto expected = new KindDto(kind);
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(kindService, Kind.class, id)).thenReturn(kind);
+        KindDto actual = kindService.getKindDtoById(id);
+
+        assertThat(actual).isEqualTo(expected);
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+    }
+
+    @Test
+    void getKindDtoByIdFailed() {
+        long id = 1;
+        Mockito.doThrow(new AnimalApiBadRequest("message"))
+                .when(serviceUtils)
+                .checkExistsSuchIdOrThrow(kindService, Kind.class, id);
+
+        assertThatThrownBy(() -> kindService.getKindDtoById(id));
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+    }
+
+    @Test
+    void updateSuccessful() {
+        Breed breed = new Breed();
+        breed.setName("breed");
+        Animal animal = new Animal();
+
+        long id = 1;
+        String nameBefore = "Dog";
+        String nameAfter = "Cat";
+        KindDto kindDto = new KindDto(2, nameAfter, Collections.emptySet());
+
+        Kind kind = Kind.builder().id(id).name(nameBefore).breeds(Set.of(breed)).animals(Set.of(animal)).build();
+
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(kindService, Kind.class, id)).thenReturn(kind);
+        Mockito.when(kindRepository.save(kind)).thenReturn(kind);
+        KindDto expected = new KindDto(id, nameAfter, Set.of(breed.getName()));
+        KindDto actual = kindService.update(id, kindDto);
+
+        assertThat(actual).isEqualTo(expected);
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+        Mockito.verify(kindRepository).save(kind);
+        Mockito.verifyNoMoreInteractions(kindRepository);
+    }
+
+    @Test
+    void updateFailed() {
+        long id = 1;
+        KindDto kindDto = new KindDto(2, "Cat", Collections.emptySet());
+
+        String message = "message";
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(kindService, Kind.class, id)).thenThrow(new AnimalApiBadRequest(message));
+        assertThatThrownBy(()->kindService.update(id, kindDto))
+                .isInstanceOf(AnimalApiBadRequest.class)
+                .hasMessage(message);
+
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+        Mockito.verifyNoInteractions(kindRepository);
     }
 }

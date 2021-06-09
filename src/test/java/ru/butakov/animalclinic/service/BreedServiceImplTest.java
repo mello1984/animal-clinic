@@ -15,8 +15,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(properties = "spring.main.lazy-initialization=true")
 class BreedServiceImplTest {
@@ -101,9 +101,7 @@ class BreedServiceImplTest {
     void addAndReturnDtoSuccessful() {
 
         String kindName = "Cat";
-        Kind kind = new Kind();
-        kind.setId(2);
-        kind.setName(kindName);
+        Kind kind = Kind.builder().id(2).name(kindName).build();
 
         long id = 5;
         String name = "Home cat";
@@ -179,9 +177,7 @@ class BreedServiceImplTest {
     @Test
     void findAllDtoSuccessful() {
         String kindName = "Cat";
-        Kind kind = new Kind();
-        kind.setId(2);
-        kind.setName(kindName);
+        Kind kind = Kind.builder().id(2).name(kindName).build();
 
         long id = 5;
         String name = "Home cat";

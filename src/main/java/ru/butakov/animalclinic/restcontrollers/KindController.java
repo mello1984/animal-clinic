@@ -1,7 +1,6 @@
 package ru.butakov.animalclinic.restcontrollers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.butakov.animalclinic.domain.dto.KindDto;
@@ -16,15 +15,34 @@ public class KindController {
     KindService kindService;
 
     @GetMapping
-    ResponseEntity<List<KindDto>> getAnimalTypes() {
+    ResponseEntity<List<KindDto>> getKinds() {
         List<KindDto> kindDtos = kindService.findAllDto();
-        return new ResponseEntity<>(kindDtos, HttpStatus.OK);
+        return ResponseEntity.ok(kindDtos);
+    }
+
+    @GetMapping("/{id}")
+    ResponseEntity<KindDto> getKind(@PathVariable("id") long id) {
+        KindDto kindDto = kindService.getKindDtoById(id);
+        return ResponseEntity.ok(kindDto);
     }
 
     @PostMapping
     ResponseEntity<KindDto> add(@RequestParam("name") String name) {
         KindDto kindDto = kindService.addAndReturnDto(name);
-        return new ResponseEntity<>(kindDto, HttpStatus.OK);
+        return ResponseEntity.ok(kindDto);
+    }
+
+    @PatchMapping("/{id}")
+    ResponseEntity<KindDto> update(@PathVariable("id") long id, @RequestBody KindDto kindDto) {
+        KindDto result = kindService.update(id, kindDto);
+        return ResponseEntity.ok(result);
+    }
+
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<KindDto> delete(@PathVariable("id") long id) {
+        kindService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
 }

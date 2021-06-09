@@ -53,4 +53,24 @@ public class KindServiceImpl implements KindService {
     public List<KindDto> findAllDto() {
         return kindRepository.findAll().stream().map(KindDto::new).collect(Collectors.toList());
     }
+
+    @Override
+    public void delete(long id) {
+        Kind kind = serviceUtils.checkExistsSuchIdOrThrow(this, Kind.class, id);
+        kindRepository.delete(kind);
+    }
+
+    @Override
+    public KindDto getKindDtoById(long id) {
+        Kind kind = serviceUtils.checkExistsSuchIdOrThrow(this, Kind.class, id);
+        return new KindDto(kind);
+    }
+
+    @Override
+    public KindDto update(long id, KindDto kindDto) {
+        Kind kind = serviceUtils.checkExistsSuchIdOrThrow(this, Kind.class, id);
+        kind.setName(kindDto.getName());
+        kind = kindRepository.save(kind);
+        return new KindDto(kind);
+    }
 }

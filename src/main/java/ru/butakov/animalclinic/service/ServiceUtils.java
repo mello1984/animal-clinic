@@ -1,6 +1,7 @@
 package ru.butakov.animalclinic.service;
 
 import org.springframework.stereotype.Component;
+import ru.butakov.animalclinic.domain.Kind;
 import ru.butakov.animalclinic.exceptions.AnimalApiBadRequest;
 
 import java.text.MessageFormat;
@@ -26,4 +27,12 @@ public class ServiceUtils {
     }
 
 
+    public <T> T checkExistsSuchIdOrThrow(FindService<T> findService, Class<T> tClass, long id) {
+        Optional<T> tOptional = findService.findById(id);
+        if (tOptional.isEmpty()) {
+            String message = MessageFormat.format("{0} with such id <{1}> not exists", tClass.getSimpleName(), id);
+            throw new AnimalApiBadRequest(message);
+        }
+        return tOptional.get();
+    }
 }

@@ -7,26 +7,31 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "kinds")
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
 @RequiredArgsConstructor
-public class Kind implements HasName{
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(doNotUseGetters = true, onlyExplicitlyIncluded = true)
+public class Kind {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Setter(value = AccessLevel.NONE)
+    @EqualsAndHashCode.Include
     long id;
 
     @NonNull
     String name;
 
-    @OneToMany (mappedBy = "kind")
+    @OneToMany(mappedBy = "kind")
+    @Builder.Default
     Set<Breed> breeds = new HashSet<>();
 
     @OneToMany(mappedBy = "kind", cascade = CascadeType.ALL)
+    @Builder.Default
     Set<Animal> animals = new HashSet<>();
-
-
 }

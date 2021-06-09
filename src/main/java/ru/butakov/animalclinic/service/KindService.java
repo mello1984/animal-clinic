@@ -12,4 +12,10 @@ public interface KindService extends FindService<Kind> {
     KindDto addAndReturnDto(String name);
 
     List<KindDto> findAllDto();
+
+    void delete(long id);
+
+    KindDto getKindDtoById(long id);
+
+    KindDto update(long id, KindDto kindDto);
 }

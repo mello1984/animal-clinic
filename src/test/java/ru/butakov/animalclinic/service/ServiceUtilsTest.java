@@ -19,7 +19,7 @@ class ServiceUtilsTest {
     private FindService<Object> findService;
 
     @Test
-    void checkExistsSuchNameOrThrowException() {
+    void checkExistsSuchNameOrThrowFailed() {
         String name = "object";
         Mockito.when(findService.findByName(name)).thenReturn(Optional.empty());
 
@@ -45,7 +45,7 @@ class ServiceUtilsTest {
     }
 
     @Test
-    void checkNotExistsSuchNameOrThrowException() {
+    void checkNotExistsSuchNameOrThrowFailed() {
         String name = "object";
         Object expected = new Object();
         Mockito.when(findService.findByName(name)).thenReturn(Optional.of(expected));
@@ -66,6 +66,33 @@ class ServiceUtilsTest {
         assertThatNoException().isThrownBy(() -> serviceUtils.checkNotExistsSuchNameOrThrow(findService, Object.class, name));
 
         Mockito.verify(findService).findByName(name);
+        Mockito.verifyNoMoreInteractions(findService);
+    }
+
+    @Test
+    void checkExistsSuchIdOrThrowFailed() {
+        long id = 2;
+        Mockito.when(findService.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> serviceUtils.checkExistsSuchIdOrThrow(findService, Object.class, id))
+                .isInstanceOf(AnimalApiBadRequest.class)
+                .hasMessage(String.format("Object with such id <%s> not exists", id));
+
+        Mockito.verify(findService).findById(id);
+        Mockito.verifyNoMoreInteractions(findService);
+    }
+
+    @Test
+
+    void checkExistsSuchIdOrThrowSuccessful() {
+        long id = 3;
+        Object expected = new Object();
+        Mockito.when(findService.findById(id)).thenReturn(Optional.of(expected));
+
+        Object actual = serviceUtils.checkExistsSuchIdOrThrow(findService, Object.class, id);
+        assertThat(actual).isEqualTo(expected);
+
+        Mockito.verify(findService).findById(id);
         Mockito.verifyNoMoreInteractions(findService);
     }
 }
