@@ -7,9 +7,7 @@ import ru.butakov.animalclinic.domain.Kind;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class KindRepositoryTest {

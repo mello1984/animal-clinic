@@ -3,6 +3,7 @@ package ru.butakov.animalclinic.domain.dto;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import ru.butakov.animalclinic.domain.Breed;
 import ru.butakov.animalclinic.domain.Kind;

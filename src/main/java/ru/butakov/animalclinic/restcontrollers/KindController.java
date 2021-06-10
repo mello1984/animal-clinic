@@ -33,8 +33,8 @@ public class KindController {
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<KindDto> update(@PathVariable("id") long id, @RequestBody KindDto kindDto) {
-        KindDto result = kindService.update(id, kindDto);
+    ResponseEntity<KindDto> update(@PathVariable("id") long id, @RequestBody KindDto update) {
+        KindDto result = kindService.update(id, update);
         return ResponseEntity.ok(result);
     }
 
