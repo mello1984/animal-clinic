@@ -11,5 +11,11 @@ public interface BreedService extends FindService<Breed> {
 
     BreedDto addAndReturnDto(String name, String kindName);
 
-    List<BreedDto> findAllDto();
+    List<BreedDto> getAllDto();
+
+    BreedDto getBreedDtoById(long id);
+
+    BreedDto update(long id, BreedDto breedDto);
+
+    void delete(long id);
 }

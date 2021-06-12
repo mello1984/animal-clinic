@@ -7,8 +7,8 @@ import lombok.experimental.FieldDefaults;
 import ru.butakov.animalclinic.domain.Breed;
 
 @Getter
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
-@EqualsAndHashCode
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@EqualsAndHashCode(doNotUseGetters = true)
 public class BreedDto {
     long id;
     String name;

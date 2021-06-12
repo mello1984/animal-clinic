@@ -2,9 +2,12 @@ package ru.butakov.animalclinic.service;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import ru.butakov.animalclinic.dao.BreedRepository;
 import ru.butakov.animalclinic.domain.Breed;
@@ -12,6 +15,7 @@ import ru.butakov.animalclinic.domain.Kind;
 import ru.butakov.animalclinic.domain.dto.BreedDto;
 import ru.butakov.animalclinic.exceptions.AnimalApiException;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -167,9 +171,9 @@ class BreedServiceImplTest {
     }
 
     @Test
-    void findAllDtoEmptyList() {
+    void getAllDtoEmptyList() {
         Mockito.when(breedRepository.findAll()).thenReturn(Collections.emptyList());
-        List<BreedDto> actual = breedService.findAllDto();
+        List<BreedDto> actual = breedService.getAllDto();
 
         assertThat(actual).isEqualTo(Collections.emptyList());
         Mockito.verify(breedRepository).findAll();
@@ -177,7 +181,7 @@ class BreedServiceImplTest {
     }
 
     @Test
-    void findAllDtoSuccessful() {
+    void getAllDtoSuccessful() {
         String kindName = "Cat";
         Kind kind = Kind.builder().id(2).name(kindName).build();
 
@@ -190,10 +194,110 @@ class BreedServiceImplTest {
 
         Mockito.when(breedRepository.findAll()).thenReturn(List.of(breed));
         List<BreedDto> expected = List.of(new BreedDto(id, name, kindName));
-        List<BreedDto> actual = breedService.findAllDto();
+        List<BreedDto> actual = breedService.getAllDto();
 
         assertThat(actual).isEqualTo(expected);
         Mockito.verify(breedRepository).findAll();
         Mockito.verifyNoMoreInteractions(breedRepository);
+    }
+
+    @Test
+    void getBreedDtoByIdSuccessful() {
+        long id = 1000;
+        Breed breed = Breed.builder().id(id).kind(new Kind("Dog")).build();
+        BreedDto expected = new BreedDto(breed);
+
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(breedService, Breed.class, id)).thenReturn(breed);
+        BreedDto actual = breedService.getBreedDtoById(id);
+
+        assertThat(actual).isEqualTo(expected);
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(breedService, Breed.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+    }
+
+    @Test
+    void getBreedDtoByIdFailed() {
+        long id = 1000;
+        String message = "message";
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(breedService, Breed.class, id)).thenThrow(new AnimalApiException(HttpStatus.NOT_FOUND, message));
+
+        assertThatThrownBy(() -> breedService.getBreedDtoById(id))
+                .isInstanceOf(AnimalApiException.class)
+                .hasMessageContaining(message);
+
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(breedService, Breed.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+    }
+
+    @Test
+    void updateSuccessful() {
+        long id = 1000;
+        Kind kind = Kind.builder().id(1).name("kind").build();
+
+        String name1 = "name1", name2 = "name2";
+        Breed breed = Breed.builder().id(id).name(name1).kind(kind).build();
+        BreedDto changeDto = new BreedDto(Breed.builder().id(2).name(name2).kind(kind).build());
+
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(breedService, Breed.class, id)).thenReturn(breed);
+        Mockito.when(breedRepository.save(breed)).thenReturn(breed);
+
+        Breed updated = Breed.builder().id(id).name(name2).kind(kind).build();
+        BreedDto expected = new BreedDto(updated);
+        BreedDto actual = breedService.update(id, changeDto);
+
+        assertThat(actual).isEqualTo(expected);
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(breedService, Breed.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+        Mockito.verify(breedRepository).save(Mockito.any(Breed.class));
+        Mockito.verifyNoMoreInteractions(breedRepository);
+    }
+
+    @Test
+    void updateFailed() {
+        long id = 1000;
+        Kind kind = Kind.builder().id(1).name("kind").build();
+        BreedDto changeDto = new BreedDto(Breed.builder().id(2).name("name2").kind(kind).build());
+
+        String message = "message";
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(breedService, Breed.class, id)).thenThrow(new AnimalApiException(HttpStatus.NOT_FOUND, message));
+
+        assertThatThrownBy(() -> breedService.update(id, changeDto))
+                .isInstanceOf(AnimalApiException.class)
+                .hasMessageContaining(message)
+                .hasMessageContaining(HttpStatus.NOT_FOUND.name());
+
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(breedService, Breed.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+        Mockito.verifyNoInteractions(breedRepository);
+    }
+
+    @Test
+    void deleteSuccessful() {
+        long id = 1000;
+        Breed breed = Breed.builder().id(id).name("Home dog").build();
+
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(breedService, Breed.class, id)).thenReturn(breed);
+        breedService.delete(id);
+
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(breedService, Breed.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+        Mockito.verify(breedRepository).delete(breed);
+        Mockito.verifyNoMoreInteractions(breedRepository);
+    }
+
+    @Test
+    void deleteFailed() {
+        long id = 1000;
+        String message = "message";
+
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(breedService, Breed.class, id)).thenThrow(new AnimalApiException(HttpStatus.NOT_FOUND, message));
+        assertThatThrownBy(() -> breedService.delete(id))
+                .isInstanceOf(AnimalApiException.class)
+                .hasMessageContaining(message)
+                .hasMessageContaining(HttpStatus.NOT_FOUND.name());
+
+        Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(breedService, Breed.class, id);
+        Mockito.verifyNoMoreInteractions(serviceUtils);
+        Mockito.verifyNoInteractions(breedRepository);
     }
 }

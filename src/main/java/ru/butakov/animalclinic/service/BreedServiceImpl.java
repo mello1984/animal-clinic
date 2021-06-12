@@ -57,7 +57,27 @@ public class BreedServiceImpl implements BreedService {
     }
 
     @Override
-    public List<BreedDto> findAllDto() {
+    public List<BreedDto> getAllDto() {
         return breedRepository.findAll().stream().map(BreedDto::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public BreedDto getBreedDtoById(long id) {
+        Breed breed = serviceUtils.checkExistsSuchIdOrThrow(this, Breed.class, id);
+        return new BreedDto(breed);
+    }
+
+    @Override
+    public BreedDto update(long id, BreedDto breedDto) {
+        Breed breed = serviceUtils.checkExistsSuchIdOrThrow(this, Breed.class, id);
+        breed.setName(breedDto.getName());
+        breed = breedRepository.save(breed);
+        return new BreedDto(breed);
+    }
+
+    @Override
+    public void delete(long id) {
+        Breed breed = serviceUtils.checkExistsSuchIdOrThrow(this, Breed.class, id);
+        breedRepository.delete(breed);
     }
 }
