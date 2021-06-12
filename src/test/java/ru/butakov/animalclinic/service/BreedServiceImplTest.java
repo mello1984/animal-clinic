@@ -5,11 +5,12 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import ru.butakov.animalclinic.dao.BreedRepository;
 import ru.butakov.animalclinic.domain.Breed;
 import ru.butakov.animalclinic.domain.Kind;
 import ru.butakov.animalclinic.domain.dto.BreedDto;
-import ru.butakov.animalclinic.exceptions.AnimalApiBadRequest;
+import ru.butakov.animalclinic.exceptions.AnimalApiException;
 
 import java.util.Collections;
 import java.util.List;
@@ -130,11 +131,12 @@ class BreedServiceImplTest {
         String kindName = "Cat";
         String name = "Home cat";
         String message = "message";
-        Mockito.when(serviceUtils.checkExistsSuchNameOrThrow(kindService, Kind.class, kindName)).thenThrow(new AnimalApiBadRequest(message));
+        Mockito.when(serviceUtils.checkExistsSuchNameOrThrow(kindService, Kind.class, kindName))
+                .thenThrow(new AnimalApiException(HttpStatus.NOT_FOUND, message));
 
         assertThatThrownBy(() -> breedService.addAndReturnDto(name, kindName))
-                .isInstanceOf(AnimalApiBadRequest.class)
-                .hasMessage(message);
+                .isInstanceOf(AnimalApiException.class)
+                .hasMessageContaining(message);
 
         Mockito.verify(serviceUtils).checkExistsSuchNameOrThrow(kindService, Kind.class, kindName);
         Mockito.verifyNoMoreInteractions(serviceUtils);
@@ -150,13 +152,13 @@ class BreedServiceImplTest {
         Kind kind = new Kind();
 
         Mockito.when(serviceUtils.checkExistsSuchNameOrThrow(kindService, Kind.class, kindName)).thenReturn(kind);
-        Mockito.doThrow(new AnimalApiBadRequest(message))
+        Mockito.doThrow(new AnimalApiException(HttpStatus.BAD_REQUEST, message))
                 .when(serviceUtils)
                 .checkNotExistsSuchNameOrThrow(breedService, Breed.class, name);
 
         assertThatThrownBy(() -> breedService.addAndReturnDto(name, kindName))
-                .isInstanceOf(AnimalApiBadRequest.class)
-                .hasMessage(message);
+                .isInstanceOf(AnimalApiException.class)
+                .hasMessageContaining(message);
 
         Mockito.verify(serviceUtils).checkExistsSuchNameOrThrow(kindService, Kind.class, kindName);
         Mockito.verify(serviceUtils).checkNotExistsSuchNameOrThrow(breedService, Breed.class, name);

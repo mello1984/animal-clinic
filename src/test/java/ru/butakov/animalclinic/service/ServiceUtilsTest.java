@@ -5,7 +5,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.butakov.animalclinic.exceptions.AnimalApiBadRequest;
+import ru.butakov.animalclinic.exceptions.AnimalApiException;
 
 import java.util.Optional;
 
@@ -24,8 +24,8 @@ class ServiceUtilsTest {
         Mockito.when(findService.findByName(name)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> serviceUtils.checkExistsSuchNameOrThrow(findService, Object.class, name))
-                .isInstanceOf(AnimalApiBadRequest.class)
-                .hasMessage(String.format("Object with such name <%s> not exists", name));
+                .isInstanceOf(AnimalApiException.class)
+                .hasMessageContaining(String.format("Object with such name <%s> not exists", name));
 
         Mockito.verify(findService).findByName(name);
         Mockito.verifyNoMoreInteractions(findService);
@@ -51,8 +51,8 @@ class ServiceUtilsTest {
         Mockito.when(findService.findByName(name)).thenReturn(Optional.of(expected));
 
         assertThatThrownBy(() -> serviceUtils.checkNotExistsSuchNameOrThrow(findService, Object.class, name))
-                .isInstanceOf(AnimalApiBadRequest.class)
-                .hasMessage(String.format("Object with such name <%s> already exists", name));
+                .isInstanceOf(AnimalApiException.class)
+                .hasMessageContaining(String.format("Object with such name <%s> already exists", name));
 
         Mockito.verify(findService).findByName(name);
         Mockito.verifyNoMoreInteractions(findService);
@@ -75,8 +75,8 @@ class ServiceUtilsTest {
         Mockito.when(findService.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> serviceUtils.checkExistsSuchIdOrThrow(findService, Object.class, id))
-                .isInstanceOf(AnimalApiBadRequest.class)
-                .hasMessage(String.format("Object with such id <%s> not exists", id));
+                .isInstanceOf(AnimalApiException.class)
+                .hasMessageContaining(String.format("Object with such id <%s> not exists", id));
 
         Mockito.verify(findService).findById(id);
         Mockito.verifyNoMoreInteractions(findService);

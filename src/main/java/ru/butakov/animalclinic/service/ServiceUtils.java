@@ -1,8 +1,8 @@
 package ru.butakov.animalclinic.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import ru.butakov.animalclinic.domain.Kind;
-import ru.butakov.animalclinic.exceptions.AnimalApiBadRequest;
+import ru.butakov.animalclinic.exceptions.AnimalApiException;
 
 import java.text.MessageFormat;
 import java.util.Optional;
@@ -13,7 +13,7 @@ public class ServiceUtils {
         Optional<T> tOptional = findService.findByName(name);
         if (tOptional.isEmpty()) {
             String message = MessageFormat.format("{0} with such name <{1}> not exists", tClass.getSimpleName(), name);
-            throw new AnimalApiBadRequest(message);
+            throw new AnimalApiException(HttpStatus.NOT_FOUND, message);
         }
         return tOptional.get();
     }
@@ -22,7 +22,7 @@ public class ServiceUtils {
         Optional<T> tOptional = findService.findByName(name);
         if (tOptional.isPresent()) {
             String message = MessageFormat.format("{0} with such name <{1}> already exists", tClass.getSimpleName(), name);
-            throw new AnimalApiBadRequest(message);
+            throw new AnimalApiException(HttpStatus.BAD_REQUEST, message);
         }
     }
 
@@ -31,7 +31,7 @@ public class ServiceUtils {
         Optional<T> tOptional = findService.findById(id);
         if (tOptional.isEmpty()) {
             String message = MessageFormat.format("{0} with such id <{1}> not exists", tClass.getSimpleName(), id);
-            throw new AnimalApiBadRequest(message);
+            throw new AnimalApiException(HttpStatus.NOT_FOUND, message);
         }
         return tOptional.get();
     }

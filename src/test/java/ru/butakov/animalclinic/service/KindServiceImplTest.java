@@ -5,12 +5,13 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import ru.butakov.animalclinic.dao.KindRepository;
 import ru.butakov.animalclinic.domain.Animal;
 import ru.butakov.animalclinic.domain.Breed;
 import ru.butakov.animalclinic.domain.Kind;
 import ru.butakov.animalclinic.domain.dto.KindDto;
-import ru.butakov.animalclinic.exceptions.AnimalApiBadRequest;
+import ru.butakov.animalclinic.exceptions.AnimalApiException;
 
 import java.util.Collections;
 import java.util.List;
@@ -106,7 +107,7 @@ class KindServiceImplTest {
         String name = "Dog";
         String message = "message";
 
-        Mockito.doThrow(new AnimalApiBadRequest(message))
+        Mockito.doThrow(new AnimalApiException(HttpStatus.BAD_REQUEST, message))
                 .when(serviceUtils)
                 .checkNotExistsSuchNameOrThrow(kindService, Kind.class, name);
 
@@ -157,7 +158,8 @@ class KindServiceImplTest {
     @Test
     void deleteFailed() {
         long id = 1;
-        Mockito.doThrow(new AnimalApiBadRequest("message")).when(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
+        Mockito.doThrow(new AnimalApiException(HttpStatus.NOT_FOUND, "message"))
+                .when(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
 
         assertThatThrownBy(() -> kindService.delete(id));
         Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
@@ -182,7 +184,7 @@ class KindServiceImplTest {
     @Test
     void getKindDtoByIdFailed() {
         long id = 1;
-        Mockito.doThrow(new AnimalApiBadRequest("message"))
+        Mockito.doThrow(new AnimalApiException(HttpStatus.NOT_FOUND, "message"))
                 .when(serviceUtils)
                 .checkExistsSuchIdOrThrow(kindService, Kind.class, id);
 
@@ -222,10 +224,11 @@ class KindServiceImplTest {
         KindDto kindDto = new KindDto(2, "Cat", Collections.emptySet());
 
         String message = "message";
-        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(kindService, Kind.class, id)).thenThrow(new AnimalApiBadRequest(message));
-        assertThatThrownBy(()->kindService.update(id, kindDto))
-                .isInstanceOf(AnimalApiBadRequest.class)
-                .hasMessage(message);
+        Mockito.when(serviceUtils.checkExistsSuchIdOrThrow(kindService, Kind.class, id))
+                .thenThrow(new AnimalApiException(HttpStatus.NOT_FOUND, message));
+        assertThatThrownBy(() -> kindService.update(id, kindDto))
+                .isInstanceOf(AnimalApiException.class)
+                .hasMessageContaining(message);
 
         Mockito.verify(serviceUtils).checkExistsSuchIdOrThrow(kindService, Kind.class, id);
         Mockito.verifyNoMoreInteractions(serviceUtils);

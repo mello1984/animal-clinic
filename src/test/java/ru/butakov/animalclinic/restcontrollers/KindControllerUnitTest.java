@@ -7,11 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.butakov.animalclinic.domain.Kind;
 import ru.butakov.animalclinic.domain.dto.KindDto;
-import ru.butakov.animalclinic.exceptions.AnimalApiBadRequest;
+import ru.butakov.animalclinic.exceptions.AnimalApiException;
 import ru.butakov.animalclinic.service.KindService;
 
 import java.util.List;
@@ -69,14 +70,14 @@ class KindControllerUnitTest {
     void getKindByIdFailedNotSuchKind() throws Exception {
         long id = 1;
         String message = "Exception message";
-        Mockito.when(kindService.getKindDtoById(id)).thenThrow(new AnimalApiBadRequest(message));
+        Mockito.when(kindService.getKindDtoById(id)).thenThrow(new AnimalApiException(HttpStatus.NOT_FOUND, message));
 
         mockMvc.perform(get("/api/kinds/" + id))
                 .andDo(print())
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(result -> assertThat(result.getResolvedException())
-                        .isInstanceOf(AnimalApiBadRequest.class)
-                        .hasMessage(message));
+                        .isInstanceOf(AnimalApiException.class)
+                        .hasMessageContaining(message));
 
         Mockito.verify(kindService).getKindDtoById(id);
         Mockito.verifyNoMoreInteractions(kindService);
@@ -103,17 +104,17 @@ class KindControllerUnitTest {
     void addFailed() throws Exception {
         String name = "Dog";
         String message = "Exception message";
-        Mockito.when(kindService.addAndReturnDto(name)).thenThrow(new AnimalApiBadRequest(message));
+        Mockito.when(kindService.addAndReturnDto(name)).thenThrow(new AnimalApiException(HttpStatus.NOT_FOUND, message));
 
         mockMvc.perform(
                 post("/api/kinds/")
                         .param("name", name))
                 .andDo(print())
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(
                         result -> assertThat(result.getResolvedException())
-                                .isInstanceOf(AnimalApiBadRequest.class)
-                                .hasMessage(message));
+                                .isInstanceOf(AnimalApiException.class)
+                                .hasMessageContaining(message));
 
         Mockito.verify(kindService).addAndReturnDto(name);
         Mockito.verifyNoMoreInteractions(kindService);
@@ -144,15 +145,15 @@ class KindControllerUnitTest {
         KindDto update = new KindDto(Kind.builder().id(1000).name(cat).build());
 
         String message = "message";
-        Mockito.when(kindService.update(id, update)).thenThrow(new AnimalApiBadRequest(message));
+        Mockito.when(kindService.update(id, update)).thenThrow(new AnimalApiException(HttpStatus.BAD_REQUEST, message));
         mockMvc.perform(patch("/api/kinds/" + id)
                 .content(objectMapper.writeValueAsString(update)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result ->
                         assertThat(result.getResolvedException())
-                                .isInstanceOf(AnimalApiBadRequest.class)
-                                .hasMessage(message));
+                                .isInstanceOf(AnimalApiException.class)
+                                .hasMessageContaining(message));
 
         Mockito.verify(kindService).update(id, update);
         Mockito.verifyNoMoreInteractions(kindService);
@@ -175,17 +176,17 @@ class KindControllerUnitTest {
         long id = 1;
 
         String message = "message";
-        Mockito.doThrow(new AnimalApiBadRequest(message))
+        Mockito.doThrow(new AnimalApiException(HttpStatus.NOT_FOUND, message))
                 .when(kindService)
                 .delete(id);
 
         mockMvc.perform(delete("/api/kinds/" + id))
                 .andDo(print())
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(
                         result -> assertThat(result.getResolvedException())
-                                .isInstanceOf(AnimalApiBadRequest.class)
-                                .hasMessage(message));
+                                .isInstanceOf(AnimalApiException.class)
+                                .hasMessageContaining(message));
 
         Mockito.verify(kindService).delete(id);
         Mockito.verifyNoMoreInteractions(kindService);
