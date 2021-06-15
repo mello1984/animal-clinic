@@ -15,14 +15,21 @@ class KindRepositoryTest {
     KindRepository kindRepository;
 
     @Test
-    void findByName() {
-        Kind kind = new Kind();
+    void findByName_thenReturnKind() {
+        Kind expected = new Kind();
         String name = "Dog";
-        kind.setName(name);
-        kindRepository.save(kind);
+        expected.setName(name);
+        kindRepository.save(expected);
 
         Optional<Kind> kindOptional = kindRepository.findByName(name);
         assertThat(kindOptional).isNotEmpty();
         assertThat(kindOptional.get().getName()).isEqualTo(name);
+    }
+
+    @Test
+    void findByName_thenReturnEmpty() {
+        String name = "Dog";
+        Optional<Kind> kindOptional = kindRepository.findByName(name);
+        assertThat(kindOptional).isEqualTo(Optional.empty());
     }
 }

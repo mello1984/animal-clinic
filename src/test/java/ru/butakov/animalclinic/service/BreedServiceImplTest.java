@@ -2,12 +2,9 @@ package ru.butakov.animalclinic.service;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import ru.butakov.animalclinic.dao.BreedRepository;
 import ru.butakov.animalclinic.domain.Breed;
@@ -15,7 +12,6 @@ import ru.butakov.animalclinic.domain.Kind;
 import ru.butakov.animalclinic.domain.dto.BreedDto;
 import ru.butakov.animalclinic.exceptions.AnimalApiException;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -56,10 +52,7 @@ class BreedServiceImplTest {
     @Test
     void findById() {
         long id = 1;
-        Breed breed = new Breed();
-        breed.setId(id);
-        breed.setName("dog");
-
+        Breed breed = Breed.builder().id(id).name("dog").build();
         Optional<Breed> expected = Optional.of(breed);
         Mockito.when(breedRepository.findById(id)).thenReturn(expected);
 
@@ -72,10 +65,7 @@ class BreedServiceImplTest {
     @Test
     void findByName() {
         String name = "dog";
-        Breed breed = new Breed();
-        breed.setId(1);
-        breed.setName(name);
-
+        Breed breed = Breed.builder().id(1).name(name).build();
         Optional<Breed> expected = Optional.of(breed);
         Mockito.when(breedRepository.findByName(name)).thenReturn(expected);
 

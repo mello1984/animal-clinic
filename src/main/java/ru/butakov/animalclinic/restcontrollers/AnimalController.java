@@ -3,11 +3,10 @@ package ru.butakov.animalclinic.restcontrollers;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.butakov.animalclinic.dao.AnimalRepository;
-import ru.butakov.animalclinic.domain.Animal;
+import ru.butakov.animalclinic.domain.dto.AnimalDto;
+import ru.butakov.animalclinic.service.AnimalService;
 
 import java.util.List;
 
@@ -16,21 +15,35 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AnimalController {
     @Autowired
-    AnimalRepository animalRepository;
+    AnimalService animalService;
 
     @GetMapping
-    public ResponseEntity<List<Animal>> getAnimals() {
-        return new ResponseEntity<>(animalRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<AnimalDto>> getAnimals() {
+        return ResponseEntity.ok(animalService.findAllDto());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AnimalDto> getAnimal(@PathVariable("id") long id) {
+        AnimalDto animalDto = animalService.getAnimalDtoById(id);
+        return ResponseEntity.ok(animalDto);
     }
 
     @PostMapping
-    public ResponseEntity<Animal> add(@RequestParam() String name) {
-        Animal animal = new Animal();
-        animal.setName(name);
+    public ResponseEntity<AnimalDto> add(@RequestParam() String name) {
+        AnimalDto animalDto = animalService.addAndReturnDto(name);
+        return ResponseEntity.ok(animalDto);
+    }
 
-        animal = animalRepository.save(animal);
-        return new ResponseEntity<>(animal, HttpStatus.OK);
+    @PatchMapping("/{id}")
+    public ResponseEntity<AnimalDto> update(@PathVariable("id") long id, @RequestBody AnimalDto update) {
+        AnimalDto result = animalService.update(id, update);
+        return ResponseEntity.ok(result);
+    }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<AnimalDto> delete(@PathVariable("id") long id) {
+        animalService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
 }

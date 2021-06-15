@@ -1,5 +1,7 @@
 package ru.butakov.animalclinic.restcontrollers;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/kinds")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KindController {
     @Autowired
     KindService kindService;

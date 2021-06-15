@@ -15,14 +15,21 @@ class BreedRepositoryTest {
     BreedRepository breedRepository;
 
     @Test
-    void findByName() {
+    void findByName_thenReturnBreed() {
         String name = "Home cat";
-        Breed breed = new Breed();
-        breed.setName(name);
-        breedRepository.save(breed);
+        Breed expected = new Breed();
+        expected.setName(name);
+        breedRepository.save(expected);
 
         Optional<Breed> actual = breedRepository.findByName(name);
         assertThat(actual).isNotEmpty();
         assertThat(actual.get().getName()).isEqualTo(name);
+    }
+
+    @Test
+    void findByName_thenReturnEmpty() {
+        String name = "Home cat";
+        Optional<Breed> actual = breedRepository.findByName(name);
+        assertThat(actual).isEqualTo(Optional.empty());
     }
 }

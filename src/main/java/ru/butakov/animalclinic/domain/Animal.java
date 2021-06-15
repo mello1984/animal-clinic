@@ -1,9 +1,6 @@
 package ru.butakov.animalclinic.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
@@ -15,8 +12,10 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "animals")
+@Builder
+@AllArgsConstructor
+@EqualsAndHashCode
 public class Animal {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;

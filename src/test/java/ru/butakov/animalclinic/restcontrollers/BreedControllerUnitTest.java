@@ -145,8 +145,10 @@ class BreedControllerUnitTest {
         BreedDto afterDto = new BreedDto(after);
 
         Mockito.when(breedService.update(id, updateDto)).thenReturn(afterDto);
-        mockMvc.perform(patch("/api/breeds/" + id)
-                .content(objectMapper.writeValueAsString(updateDto)).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(
+                patch("/api/breeds/" + id)
+                        .content(objectMapper.writeValueAsString(updateDto))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(afterDto)));

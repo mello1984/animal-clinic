@@ -12,7 +12,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(properties = "spring.main.lazy-initialization=true")
-class ServiceUtilsTest {
+class ServiceUtilsImplTest {
     @Autowired
     private ServiceUtils serviceUtils;
     @Mock

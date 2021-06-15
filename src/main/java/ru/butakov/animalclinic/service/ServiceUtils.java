@@ -1,38 +1,9 @@
 package ru.butakov.animalclinic.service;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-import ru.butakov.animalclinic.exceptions.AnimalApiException;
+public interface ServiceUtils {
+    <T> T checkExistsSuchNameOrThrow(FindService<T> findService, Class<T> tClass, String name);
 
-import java.text.MessageFormat;
-import java.util.Optional;
+    <T> void checkNotExistsSuchNameOrThrow(FindService<T> findService, Class<T> tClass, String name);
 
-@Component
-public class ServiceUtils {
-    public <T> T checkExistsSuchNameOrThrow(FindService<T> findService, Class<T> tClass, String name) {
-        Optional<T> tOptional = findService.findByName(name);
-        if (tOptional.isEmpty()) {
-            String message = MessageFormat.format("{0} with such name <{1}> not exists", tClass.getSimpleName(), name);
-            throw new AnimalApiException(HttpStatus.NOT_FOUND, message);
-        }
-        return tOptional.get();
-    }
-
-    public <T> void checkNotExistsSuchNameOrThrow(FindService<T> findService, Class<T> tClass, String name) {
-        Optional<T> tOptional = findService.findByName(name);
-        if (tOptional.isPresent()) {
-            String message = MessageFormat.format("{0} with such name <{1}> already exists", tClass.getSimpleName(), name);
-            throw new AnimalApiException(HttpStatus.BAD_REQUEST, message);
-        }
-    }
-
-
-    public <T> T checkExistsSuchIdOrThrow(FindService<T> findService, Class<T> tClass, long id) {
-        Optional<T> tOptional = findService.findById(id);
-        if (tOptional.isEmpty()) {
-            String message = MessageFormat.format("{0} with such id <{1}> not exists", tClass.getSimpleName(), id);
-            throw new AnimalApiException(HttpStatus.NOT_FOUND, message);
-        }
-        return tOptional.get();
-    }
+    <T> T checkExistsSuchIdOrThrow(FindService<T> findService, Class<T> tClass, long id);
 }
